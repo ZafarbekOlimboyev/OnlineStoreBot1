@@ -197,6 +197,9 @@ async def del_ad(msg: Message, state: FSMContext):
             caption=f"<b>{ad[1]}</b>\n\n{ad[2]}\n\nPrice: ${ad[3]}",
             parse_mode=ParseMode.HTML, reply_markup=keyboard
         )
+
+#----------------------------------------------------------------------------------#
+
 @ads_router.callback_query(ClientAdsStates.del_ad)
 async def del_ad1(query: CallbackQuery,state: FSMContext):
     if query.data[0] == "r":
@@ -232,3 +235,4 @@ async def del_ad1(query: CallbackQuery,state: FSMContext):
         await query.answer("Deleted")
         await query.message.answer("Deleted")
         await state.clear()
+#-------------------FINISH-----------------------------------------------------#
