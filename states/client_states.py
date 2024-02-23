@@ -9,3 +9,5 @@ class ClientAdsStates(StatesGroup):
     insertPrice = State()
     insertImages = State()
     insertPhone = State()
+    show_ad = State()
+    del_ad = State()

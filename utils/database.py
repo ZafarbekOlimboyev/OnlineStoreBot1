@@ -122,3 +122,6 @@ class Database:
     def info_ad(self,file_id):
         file_ids = self.cursor.execute("SELECT * FROM ads WHERE ad_images=?;", (file_id,))
         return file_ids.fetchone()
+    def del_ad_with_img(self,file_id):
+        self.cursor.execute("DELETE FROM ads WHERE ad_images=?;",(file_id,))
+        self.conn.commit()

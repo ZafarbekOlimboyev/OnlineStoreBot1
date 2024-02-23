@@ -26,3 +26,12 @@ def back_ad(file_id,u_id):
                 return file_ids[index-1][0]
             else:return None
         index +=1
+def this_ad(file_id,u_id):
+    file_ids = list(db.get_images_file_id(u_id))
+    index = 0
+    for i in file_ids:
+        # print(i,file_id)
+        if file_id in i[0]:
+            return file_ids[index][0]
+        index +=1
+    # return "a"

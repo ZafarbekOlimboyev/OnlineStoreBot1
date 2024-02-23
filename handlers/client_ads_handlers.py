@@ -7,8 +7,9 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
 
 from config import DB_NAME, admins
-from functions.show_ad import next_ad, back_ad
-from keyboards.client_inline_keyboards import get_category_list, get_product_list, left_right
+from functions.show_ad import next_ad, back_ad, this_ad
+from keyboards.client_inline_keyboards import get_category_list, get_product_list, left_right, del_left_right, \
+    del_left_righ
 from states.client_states import ClientAdsStates
 from utils.database import Database
 from utils.my_commands import commands_user
@@ -115,7 +116,8 @@ async def ad_phone_handler(message: Message, state: FSMContext):
 #-----------------------Command ads----------------------------------------#
 #_______________________START______________________________________________#
 @ads_router.message(Command('ads'))
-async def ads_list_handler(message: Message):
+async def ads_list_handler(message: Message, state: FSMContext):
+    await state.set_state(ClientAdsStates.show_ad)
     my_ads = db.get_my_ads(message.from_user.id)
     my_ads = list(my_ads)
     count_ad = len(my_ads)
@@ -140,7 +142,7 @@ async def ads_list_handler(message: Message):
 
 #----------------------------------------------------------------------------------#
 
-@ads_router.callback_query()
+@ads_router.callback_query(ClientAdsStates.show_ad)
 async def left_right_(query: CallbackQuery):
     if query.data[0] == "r":
         my_ads = db.info_ad(next_ad(file_id=query.data[1:],u_id=query.from_user.id))
@@ -168,3 +170,65 @@ async def left_right_(query: CallbackQuery):
             )
         else:
             await query.answer("finished")
+#-------------------FINISH-----------------------------------------------------#
+
+#-------------------- Command del_ad-------------------------------------------#
+@ads_router.message(Command("del_ad"))
+async def del_ad(msg: Message, state: FSMContext):
+    await state.set_state(ClientAdsStates.del_ad)
+    my_ads = db.get_my_ads(msg.from_user.id)
+    my_ads = list(my_ads)
+    count_ad = len(my_ads)
+    # print(message.from_user.id)
+    if count_ad == 0:
+        await msg.answer(text="You have not any ads")
+    elif count_ad == 1:
+        ad = my_ads[0]
+        await msg.answer_photo(
+            photo=ad[4],
+            caption=f"<b>{ad[1]}</b>\n\n{ad[2]}\n\nPrice: ${ad[3]}",
+            parse_mode=ParseMode.HTML,reply_markup=del_left_righ(ad[4][:63])
+        )
+    else:
+        ad = my_ads[0]
+        keyboard = del_left_right(ad[4][:63])
+        await msg.answer_photo(
+            photo=ad[4],
+            caption=f"<b>{ad[1]}</b>\n\n{ad[2]}\n\nPrice: ${ad[3]}",
+            parse_mode=ParseMode.HTML, reply_markup=keyboard
+        )
+@ads_router.callback_query(ClientAdsStates.del_ad)
+async def del_ad1(query: CallbackQuery,state: FSMContext):
+    if query.data[0] == "r":
+        my_ads = db.info_ad(next_ad(file_id=query.data[1:],u_id=query.from_user.id))
+        if my_ads:
+            ad = my_ads
+            keyboard = del_left_right(ad[4][:63])
+            await query.message.delete()
+            await query.message.answer_photo(
+                photo=ad[4],
+                caption=f"<b>{ad[1]}</b>\n\n{ad[2]}\n\nPrice: ${ad[3]}",
+                parse_mode=ParseMode.HTML, reply_markup=keyboard
+            )
+        else:
+            await query.answer(text="finish")
+    elif query.data[0] == "l":
+        my_ads = db.info_ad(back_ad(file_id=query.data[1:], u_id=query.from_user.id))
+        if my_ads:
+            ad = my_ads
+            keyboard = del_left_right(ad[4][:63])
+            await query.message.delete()
+            await query.message.answer_photo(
+                photo=ad[4],
+                caption=f"<b>{ad[1]}</b>\n\n{ad[2]}\n\nPrice: ${ad[3]}",
+                parse_mode=ParseMode.HTML, reply_markup=keyboard
+            )
+        else:
+            await query.answer("finished")
+    else:
+        # print(this_ad(query.data[1:],u_id=query.from_user.id))
+        db.del_ad_with_img(this_ad(query.data[1:],u_id=query.from_user.id))
+        await query.message.delete()
+        await query.answer("Deleted")
+        await query.message.answer("Deleted")
+        await state.clear()

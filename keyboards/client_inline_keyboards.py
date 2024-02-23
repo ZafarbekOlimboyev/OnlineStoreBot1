@@ -40,3 +40,15 @@ def left_right(file_id: str):
     [InlineKeyboardButton(text="⬅️", callback_data=f"l{file_id}"),InlineKeyboardButton(text="➡️",callback_data=f"r{file_id}")]
     ])
     return left_right1
+
+def del_left_right(file_id: str):
+    left_right1 = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="This ad",callback_data=f"{file_id}")],
+        [InlineKeyboardButton(text="⬅️", callback_data=f"l{file_id}"),InlineKeyboardButton(text="➡️",callback_data=f"r{file_id}")]
+    ])
+    return left_right1
+def del_left_righ(file_id: str):
+    left_right1 = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="This ad",callback_data=f"{file_id}")]
+    ])
+    return left_right1
